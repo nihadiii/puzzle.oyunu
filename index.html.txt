@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Oyunu</title>
+    <style>
+        /* Ümumi Stil */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .page {
+            display: none;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .active {
+            display: block;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 15px 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        /* Qeydiyyat Səhifəsi */
+        #register-page {
+            text-align: center;
+        }
+        #register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-group {
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Profil və Oyun Səhifəsi */
+        #game-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        #profile-section {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        #profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #3498db;
+            margin-bottom: 15px;
+            background-color: #eee;
+        }
+        #profile-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 10px 0 5px;
+            color: #2c3e50;
+        }
+        #profile-score {
+            font-size: 1.2em;
+            color: #27ae60;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        #game-section {
+            flex: 1;
+        }
+        #puzzle-board {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #333;
+            position: relative;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #preview-container {
+            width: 100%;
+            height: 200px;
+            margin: 15px 0;
+            border: 2px solid #333;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .puzzle-piece {
+            position: absolute;
+            border: 1px solid #fff;
+            cursor: move;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        .puzzle-piece:hover {
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            transform: scale(1.05);
+        }
+        #timer-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        #timer, #total-timer {
+            font-size: 1.3em;
+            font-weight: bold;
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 150px;
+            text-align: center;
+        }
+        #current-puzzle {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .completed {
+            border: 3px solid #4CAF50 !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+        .congrats {
+            font-size: 1.3em;
+            color: #27ae60;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Reytinq Səhifəsi */
+        #leaderboard-page table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #leaderboard-page th {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        #leaderboard-page td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        #leaderboard-page tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        #leaderboard-page tr:hover {
+            background-color: #eaf4fd;
+        }
+        .profile-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        #back-to-game-btn {
+            display: block;
+            margin: 20px auto;
+            background-color: #2ecc71;
+        }
+        #back-to-game-btn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. Qeydiyyat Səhifəsi -->
+    <div id="register-page" class="page active">
+        <h1>Puzzle Oyununa Xoş Gəlmisiniz</h1>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="first-name">Ad</label>
+                <input type="text" id="first-name" placeholder="Adınız" required>
+            </div>
+            <div class="form-group">
+                <label for="last-name">Soyad</label>
+                <input type="text" id="last-name" placeholder="Soyadınız" required>
+            </div>
+            <div class="form-group">
+                <label for="avatar">Profil Şəkli (URL)</label>
+                <input type="url" id="avatar" placeholder="https://example.com/photo.jpg">
+            </div>
+            <button type="submit">Oyna</button>
+        </form>
+    </div>
+
+    <!-- 2. Oyun Səhifəsi -->
+    <div id="game-page" class="page">
+        <h1>Puzzle Oyunu</h1>
+        <div id="game-container">
+            <div id="profile-section">
+                <img id="profile-image" src="" alt="Profil şəkli">
+                <div id="profile-name"></div>
+                <div id="profile-score">Xal: 0</div>
+                <div id="current-puzzle">Puzzle: 1/5</div>
+                <div id="timer">Vaxt: 00:00</div>
+            </div>
+            
+            <div id="game-section">
+                <div id="preview-container">
+                    <img id="preview-image" src="" alt="Puzzle önizləməsi">
+                </div>
+                <div id="puzzle-board"></div>
+                <div id="timer-container">
+                    <div id="total-timer">Ümumi vaxt: 00:00</div>
+                    <button id="next-btn" disabled>Növbəti Puzzle</button>
+                </div>
+                <div id="congrats-message" class="congrats" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Reytinq Səhifəsi -->
+    <div id="leaderboard-page" class="page">
+        <h1>Reytinq Cədvəli</h1>
+        <table id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Yer</th>
+                    <th>İstifadəçi</th>
+                    <th>Vaxt</th>
+                    <th>Xal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JavaScript ilə doldurulacaq -->
+            </tbody>
+        </table>
+        <button id="back-to-game-btn">Əsas Səhifəyə Qayıt</button>
+    </div>
+
+    <script>
+        // 1. Dəyişənlər və DOM elementləri
+        const pages = {
+            register: document.getElementById('register-page'),
+            game: document.getElementById('game-page'),
+            leaderboard: document.getElementById('leaderboard-page')
+        };
+
+        const registerForm = document.getElementById('register-form');
+        const firstNameInput = document.getElementById('first-name');
+        const lastNameInput = document.getElementById('last-name');
+        const avatarInput = document.getElementById('avatar');
+
+        // Profil elementləri
+        const profileImage = document.getElementById('profile-image');
+        const profileName = document.getElementById('profile-name');
+        const profileScore = document.getElementById('profile-score');
+
+        // Oyun dəyişənləri
+        const puzzleImages = [
+            'https://picsum.photos/id/1018/800/600',
+            'https://picsum.photos/id/1025/800/600',
+            'https://picsum.photos/id/1040/800/600',
+            'https://picsum.photos/id/1062/800/600',
+            'https://picsum.photos/id/1074/800/600'
+        ];
+        
+        let currentUser = null;
+        let currentPuzzle = 0;
+        let currentPuzzleTime = 0;
+        let totalTime = 0;
+        let currentTimer = null;
+        let totalTimer = null;
+        let pieces = [];
+        let isDragging = false;
+        let currentPiece = null;
+        let offsetX, offsetY;
+        let isPuzzleCompleted = false;
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        let userScore = 0;
+
+        // Oyun elementləri
+        const puzzleBoard = document.getElementById('puzzle-board');
+        const previewImage = document.getElementById('preview-image');
+        const timerElement = document.getElementById('timer');
+        const totalTimerElement = document.getElementById('total-timer');
+        const currentPuzzleElement = document.getElementById('current-puzzle');
+        const nextButton = document.getElementById('next-btn');
+        const congratsMessage = document.getElementById('congrats-message');
+        const leaderboardTable = document.getElementById('leaderboard-table').querySelector('tbody');
+        const backToGameBtn = document.getElementById('back-to-game-btn');
+
+        // 2. Səhifə Naviqasiyası
+        function showPage(page) {
+            Object.values(pages).forEach(p => p.classList.remove('active'));
+            pages[page].classList.add('active');
+        }
+
+        // 3. Qeydiyyat Prosesi
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Default avatar əgər boşdursa
+            let avatarUrl = avatarInput.value.trim();
+            if (!avatarUrl) {
+                avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(firstNameInput.value.charAt(0)+lastNameInput.value.charAt(0))}&background=3498db&color=fff&size=150`;
+            }
+            
+            currentUser = {
+                firstName: firstNameInput.value.trim(),
+                lastName: lastNameInput.value.trim(),
+                avatar: avatarUrl,
+                startTime: new Date().getTime()
+            };
+            
+            // Profil məlumatlarını doldur
+            profileImage.src = currentUser.avatar;
+            profileName.textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            profileScore.textContent = `Xal: 0`;
+            
+            // Oyun səhifəsinə keçid
+            showPage('game');
+            initGame();
+        });
+
+        // 4. Oyun Funksiyaları
+        function initGame() {
+            currentPuzzle = 0;
+            totalTime = 0;
+            currentPuzzleTime = 0;
+            userScore = 0;
+            updateTimerDisplay();
+            updateTotalTimerDisplay();
+            updateScoreDisplay();
+            loadPuzzle(currentPuzzle);
+        }
+
+        function loadPuzzle(index) {
+            resetPuzzle();
+            currentPuzzleElement.textContent = `Puzzle: ${index + 1}/5`;
+            isPuzzleCompleted = false;
+            if (congratsMessage) congratsMessage.style.display = 'none';
+            
+            const img = new Image();
+            img.src = puzzleImages[index];
+            img.onload = function() {
+                previewImage.src = this.src;
+                createPuzzlePieces(this);
+            };
+        }
+
+        function createPuzzlePieces(image) {
+            const rows = 2;
+            const cols = 3;
+            const pieceWidth = puzzleBoard.offsetWidth / cols;
+            const pieceHeight = puzzleBoard.offsetHeight / rows;
+            
+            pieces = [];
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'puzzle-piece';
+                    piece.style.width = `${pieceWidth}px`;
+                    piece.style.height = `${pieceHeight}px`;
+                    
+                    piece.style.backgroundImage = `url(${image.src})`;
+                    piece.style.backgroundSize = `${puzzleBoard.offsetWidth}px ${puzzleBoard.offsetHeight}px`;
+                    piece.style.backgroundPosition = `-${col * pieceWidth}px -${row * pieceHeight}px`;
+                    
+                    const randomX = Math.random() * (puzzleBoard.offsetWidth - pieceWidth);
+                    const randomY = Math.random() * (puzzleBoard.offsetHeight - pieceHeight);
+                    
+                    piece.style.left = `${randomX}px`;
+                    piece.style.top = `${randomY}px`;
+                    
+                    piece.addEventListener('mousedown', startDrag);
+                    
+                    puzzleBoard.appendChild(piece);
+                    pieces.push({
+                        element: piece,
+                        correctX: col * pieceWidth,
+                        correctY: row * pieceHeight,
+                        currentX: randomX,
+                        currentY: randomY
+                    });
+                }
+            }
+        }
+
+        // 5. Oyun Mexanizmləri
+        function startDrag(e) {
+            if (isPuzzleCompleted) return;
+            
+            e.preventDefault();
+            isDragging = true;
+            currentPiece = e.target;
+            
+            if (currentTimer === null && totalTimer === null) {
+                startTimers();
+            }
+            
+            const rect = currentPiece.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            currentPiece.style.zIndex = 100;
+            
+            document.addEventListener('mousemove', dragPiece);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function dragPiece(e) {
+            if (!isDragging || isPuzzleCompleted) return;
+            
+            const boardRect = puzzleBoard.getBoundingClientRect();
+            let newX = e.clientX - boardRect.left - offsetX;
+            let newY = e.clientY - boardRect.top - offsetY;
+            
+            newX = Math.max(0, Math.min(newX, puzzleBoard.offsetWidth - currentPiece.offsetWidth));
+            newY = Math.max(0, Math.min(newY, puzzleBoard.offsetHeight - currentPiece.offsetHeight));
+            
+            currentPiece.style.left = `${newX}px`;
+            currentPiece.style.top = `${newY}px`;
+            
+            const pieceIndex = Array.from(puzzleBoard.children).indexOf(currentPiece);
+            if (pieceIndex !== -1) {
+                pieces[pieceIndex].currentX = newX;
+                pieces[pieceIndex].currentY = newY;
+            }
+            
+            checkCompletion();
+        }
+
+        function stopDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            if (currentPiece) {
+                currentPiece.style.zIndex = 1;
+                currentPiece = null;
+            }
+            
+            document.removeEventListener('mousemove', dragPiece);
+            document.removeEventListener('mouseup', stopDrag);
+            
+            checkCompletion();
+        }
+
+        function checkCompletion() {
+            if (isPuzzleCompleted) return;
+            
+            const tolerance = 15;
+            let allCorrect = true;
+            
+            pieces.forEach(piece => {
+                const x = piece.currentX;
+                const y = piece.currentY;
+                
+                if (Math.abs(x - piece.correctX) > tolerance || 
+                    Math.abs(y - piece.correctY) > tolerance) {
+                    allCorrect = false;
+                }
+            });
+            
+            if (allCorrect) {
+                completePuzzle();
+            }
+        }
+
+        function completePuzzle() {
+            isPuzzleCompleted = true;
+            stopTimers();
+            
+            // Xal hesabla
+            userScore += calculatePuzzleScore(currentPuzzleTime);
+            updateScoreDisplay();
+            
+            // Puzzle tamamlandı
+            pieces.forEach(piece => {
+                piece.element.classList.add('completed');
+                piece.element.style.left = `${piece.correctX}px`;
+                piece.element.style.top = `${piece.correctY}px`;
+            });
+            
+            nextButton.disabled = false;
+            if (congratsMessage) {
+                congratsMessage.textContent = `Təbriklər! Puzzle ${currentPuzzle+1} tamamlandı! Xal: +${calculatePuzzleScore(currentPuzzleTime)}`;
+                congratsMessage.style.display = 'block';
+            }
+        }
+
+        function calculatePuzzleScore(time) {
+            // Daha sürətli tamamlama üçün daha çox xal
+            const baseScore = 500;
+            const timePenalty = Math.floor(time / 2);
+            return Math.max(100, baseScore - timePenalty);
+        }
+
+        function updateScoreDisplay() {
+            profileScore.textContent = `Xal: ${userScore}`;
+        }
+
+        // 6. Vaxt İdarəetmə
+        function startTimers() {
+            currentPuzzleTime = 0;
+            updateTimerDisplay();
+            currentTimer = setInterval(() => {
+                currentPuzzleTime++;
+                updateTimerDisplay();
+            }, 1000);
+            
+            totalTimer = setInterval(() => {
+                totalTime++;
+                updateTotalTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimers() {
+            clearInterval(currentTimer);
+            currentTimer = null;
+            clearInterval(totalTimer);
+            totalTimer = null;
+        }
+
+        function resetPuzzle() {
+            stopTimers();
+            currentPuzzleTime = 0;
+            updateTimerDisplay();
+            
+            while (puzzleBoard.firstChild) {
+                puzzleBoard.removeChild(puzzleBoard.firstChild);
+            }
+            
+            pieces = [];
+            isDragging = false;
+            currentPiece = null;
+            nextButton.disabled = true;
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentPuzzleTime / 60);
+            const seconds = currentPuzzleTime % 60;
+            timerElement.textContent = `Vaxt: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTotalTimerDisplay() {
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            totalTimerElement.textContent = `Ümumi vaxt: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 7. Oyun Nəticələri
+        nextButton.addEventListener('click', function() {
+            if (currentPuzzle < 4) {
+                currentPuzzle++;
+                loadPuzzle(currentPuzzle);
+            } else {
+                endGame();
+            }
+        });
+
+        function endGame() {
+            stopTimers();
+            
+            // Nəticəni yadda saxla
+            const finalScore = userScore + calculateTimeBonus(totalTime);
+            const result = {
+                firstName: currentUser.firstName,
+                lastName: currentUser.lastName,
+                avatar: currentUser.avatar,
+                time: totalTime,
+                score: finalScore,
+                date: new Date().toLocaleString()
+            };
+            
+            leaderboard.push(result);
+            // Ən yaxşı nəticələrə görə sırala
+            leaderboard.sort((a, b) => b.score - a.score);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            
+            // Reytinq səhifəsinə keçid
+            showLeaderboard();
+            showPage('leaderboard');
+        }
+
+        function calculateTimeBonus(totalTime) {
+            // Ümumi vaxt nə qədər azdırsa, bonus xal o qədər çox olur
+            return Math.max(0, 2000 - Math.floor(totalTime));
+        }
+
+        // 8. Reytinq Səhifəsi
+        function showLeaderboard() {
+            leaderboardTable.innerHTML = '';
+            
+            leaderboard.slice(0, 20).forEach((player, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="profile-cell">
+                        <img src="${player.avatar}" alt="${player.firstName}" class="leaderboard-avatar">
+                        ${player.firstName} ${player.lastName}
+                    </td>
+                    <td>${formatTime(player.time)}</td>
+                    <td>${player.score}</td>
+                `;
+                
+                leaderboardTable.appendChild(row);
+            });
+        }
+
+        backToGameBtn.addEventListener('click', function() {
+            showPage('game');
+            initGame();
+        });
+
+        // 9. Köməkçi Funksiyalar
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
